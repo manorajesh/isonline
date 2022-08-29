@@ -9,4 +9,7 @@ A simple Rust program that checks if ip address in `.addresses.txt` are respondi
 192.168.32.43  is up •
 192.168.32.233 is up •
 ```
-<sub>But there are colors</sub>
+<sub>But there are colors and styling</sub>
+
+### Note
+Given my elementary knowledge of Rust, `.addresses.txt` will be created where the command was run.
