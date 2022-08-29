@@ -1,4 +1,4 @@
-use std::{process::Command, fs, io};
+use std::{process::Command, fs, io::{self, Read}};
 
 fn main() {
     let addresses = match fs::read_to_string(".addresses.txt") {
@@ -31,16 +31,16 @@ fn main() {
 
 fn populate_new_file() -> String {
     println!("Could not read .addresses.txt\nCreating file...");
-    println!("Please enter one address per line:");
+    println!("Please enter one address per line (send EOF when done):");
 
     let mut new_addresses = String::new();
     io::stdin()
-        .read_line(&mut new_addresses)
+        .read_to_string(&mut new_addresses)
         .expect("Failed to read line");
 
     fs::write(".addresses.txt", &new_addresses)
         .expect("Failed to write file");
 
-    println!("File created successfully");
+    println!("File created successfully\n");
     new_addresses
 }
