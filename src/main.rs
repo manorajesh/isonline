@@ -1,46 +1,18 @@
-use std::{process::Command, fs, io::{self, Read}};
+use oping::{Ping, PingResult};
 
 fn main() {
-    let addresses = match fs::read_to_string(".addresses.txt") {
-        Ok(addresses) => addresses,
-        Err(_) => populate_new_file(),
-    };
+    let mut ping = Ping::new();
+    try!(ping.set_timeout(5));
+    try!(ping.add_host("192.168.32.1"));
 
-    for address in addresses.lines() {
-        let output = if cfg!(target_os = "windows") {
-            Command::new("ping")
-                .args(&["/n", "1", address])
-                .output()
-                .expect("failed to execute process")            
+    let responses = try!(ping.send());
+    for resp in responses {
+        if resp.dropped > 0 {
+            println!("No response from host: {}", resp.hostname);
         } else {
-            Command::new("ping")
-                .arg("-c")
-                .arg("1")
-                .arg(address)
-                .output()
-                .expect("failed to execute process")
-        };
-        
-        if output.status.success() {
-            println!("{}is up \x1b[5;32m•\x1b[0m", format!("{0:15}", address));
-        } else {
-            println!("{}is \x1b[1mdn\x1b[0m \x1b[2;31m•\x1b[0m", format!("{0:15}", address));
+            println!("Response from host {} (address {}): latency {} ms",
+                resp.hostname, resp.address, resp.latency_ms);
+            println!("    all details: {:?}", resp);
         }
     }
-}
-
-fn populate_new_file() -> String {
-    println!("Could not read .addresses.txt\nCreating file...");
-    println!("Please enter one address per line (send EOF when done):");
-
-    let mut new_addresses = String::new();
-    io::stdin()
-        .read_to_string(&mut new_addresses)
-        .expect("Failed to read line");
-
-    fs::write(".addresses.txt", &new_addresses)
-        .expect("Failed to write file");
-
-    println!("File created successfully\n");
-    new_addresses
 }
